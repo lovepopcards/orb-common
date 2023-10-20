@@ -2,10 +2,10 @@ description: >
   docker-push
 
 parameters:
-  image-repo:
+  image_repo:
     description: "The repository in ECR to push images too."
     type: string
-  image-tag:
+  image_tag:
     description: "The tag we want to use to push our docker image -- GIT_SHA ENV variable is here as well as all of our circle variables"
     type: string
     default: "${CIRCLE_BRANCH}.${GIT_SHA}"

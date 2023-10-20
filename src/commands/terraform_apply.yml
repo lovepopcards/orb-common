@@ -2,7 +2,7 @@ description: >
   terraform apply
 
 parameters:
-  additional-terraform-arguments:
+  additional_terraform_arguments:
     description: "String representation of additional arguments to pass to terraform apply"
     type: string
     default: ""
