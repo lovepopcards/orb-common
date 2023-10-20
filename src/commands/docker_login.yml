@@ -1,7 +1,0 @@
-description: >
- deploy-login
-
-steps:
-  - run:
-      name: "Log in to Github image repo"
-      command: <<include(scripts/login-echo.sh)>>

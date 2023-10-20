@@ -1,0 +1,136 @@
+version: 2.1
+
+description: "This orb contains common commands for Lovepop CI/CD circle configurations"
+
+executors:
+    base-image:
+      parameters:
+        image:
+          description: "The lovepop base image to use."
+          type: string
+        tag:
+          description: "The image tag to use."
+          type: string
+      docker:
+        - image: docker.pkg.github.com/lovepopcards/base_images/<<parameters.image>>:<<parameters.tag>>
+          auth:
+            username: lovepopcards
+            password: $GITHUB_TOKEN
+
+commands:
+  docker-login:
+    steps:
+      - run:
+          name: "Log in to Github image repo"
+          command: |
+            echo $GITHUB_TOKEN | docker login https://docker.pkg.github.com -u lovepopcards --password-stdin
+
+  docker-build:
+    parameters:
+      directory:
+        type: string
+        default: "."
+      dockerfile:
+        description: "Dockerfile to override defaults with"
+        type: string
+        default: "Dockerfile"
+    steps:
+      - run: docker build --build-arg GITHUB_TOKEN -f <<parameters.dockerfile>> -t out <<parameters.directory>>
+
+  docker-push:
+    parameters:
+      image-repo:
+        description: "The repository in ECR to push images too."
+        type: string
+      image-tag:
+        description: "The tag we want to use to push our docker image -- GIT_SHA ENV variable is here as well as all of our circle variables"
+        type: string
+        default: "${CIRCLE_BRANCH}.${GIT_SHA}"
+    steps:
+      - run:
+          name: "Login"
+          command: |
+            AWS_ECR_PWD=`aws ecr get-login-password --region us-west-2`
+            docker login --username AWS --password ${AWS_ECR_PWD} ${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com
+      - run:
+          name: "Set environment variables and push"
+          command: |
+            IMAGE_REPO="${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/<<parameters.image-repo>>"
+            GIT_SHA="$(git rev-parse --short HEAD)"
+            docker tag out ${IMAGE_REPO}:<<parameters.image-tag>>
+            docker push ${IMAGE_REPO}:<<parameters.image-tag>>
+
+  terraform-initialize:
+    parameters:
+      remote-config-key:
+        description: "The key to use for the terraform remote config."
+        type: string
+    steps:
+      - run:
+          name: "Configure Git for Terraform"
+          command: |
+            git config --global --unset url.ssh://git@github.com.insteadof || true
+            git config --global url."https://$GITHUB_TOKEN:x-oauth-basic@github.com".insteadOf "https://github.com" || true
+      - run:
+          name: "Initialize Terraform"
+          command: |
+            terraform init -input=false -backend-config="region=us-west-2" -backend-config="bucket=lovepop-terraform" \
+            -backend-config="key=${AWS_ACCOUNT_ID}/remote_config/<<parameters.remote-config-key>>" -reconfigure -backend=true terraform/
+
+  terraform-apply:
+    parameters:
+      additional-terraform-arguments:
+        description: "String representation of additional arguments to pass to terraform apply"
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: "Terraform Apply"
+          command: |
+            GIT_SHA=$(git rev-parse --short HEAD)
+            terraform apply \
+            <<parameters.additional-terraform-arguments>> \
+            -var "container_version=${CIRCLE_BRANCH}.${GIT_SHA}" -var "vpc_id=${AWS_VPC_ID}" \
+            -var "env=${AWS_ENV}" -var "account=${AWS_ACCOUNT_ID}" -var "aws_region=us-west-2" -auto-approve terraform/
+
+jobs:
+    build:
+      description: "Build and push the docker image"
+      executor:
+        name: base-image
+        image: devops
+        tag: main.latest
+      parameters:
+        image-repo:
+          description: "The repository in ECR to push images too."
+          type: string
+      steps:
+        - setup_remote_docker
+        - checkout
+        - docker-login
+        - docker-build
+        - docker-push:
+            image-repo: <<parameters.image-repo>>
+
+    terraform-apply:
+      description: "Apply terraform"
+      docker:
+        - image: hashicorp/terraform:<<parameters.terraform-version>>
+      parameters:
+        remote-config-key:
+          description: "The key to use for the terraform remote config."
+          type: string
+        additional-terraform-arguments:
+          description: "String representation of additional arguments for terraform apply"
+          type: string
+          default: ""
+        terraform-version:
+          description: "Terraform version to use"
+          type: string
+          default: "0.11.14"
+      steps:
+        - checkout
+        - terraform-initialize:
+            remote-config-key: <<parameters.remote-config-key>>
+        - terraform-apply:
+            additional-terraform-arguments: <<parameters.additional-terraform-arguments>>
