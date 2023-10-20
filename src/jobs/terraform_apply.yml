@@ -23,6 +23,6 @@ parameters:
 steps:
   - checkout
   - terraform_initialize:
-      remote-config-key: <<parameters.remote-config-key>>
+      remote_config_key: <<parameters.remote-config-key>>
   - terraform_apply:
-      additional-terraform-arguments: <<parameters.additional-terraform-arguments>>
+      additional_terraform_arguments: <<parameters.additional-terraform-arguments>>
