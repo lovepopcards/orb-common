@@ -1,0 +1,19 @@
+description: "Build and push the docker image"
+
+executor: 
+  name: default
+  image: devops
+  tag: main.latest
+
+parameters:
+  image-repo:
+    description: "The repository in ECR to push images too."
+    type: string
+steps:
+  - setup_remote_docker
+  - checkout
+  - docker-login
+  - docker-build
+  - docker-push:
+      image-repo: <<parameters.image-repo>>
+

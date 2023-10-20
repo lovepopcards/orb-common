@@ -1,0 +1,19 @@
+description: >
+  terraform Initialize
+
+
+parameters:
+  remote-config-key:
+    description: "The key to use for the terraform remote config."
+    type: string
+steps:
+  - run:
+      name: "Configure Git for Terraform"
+      command: |
+            git config --global --unset url.ssh://git@github.com.insteadof || true
+            git config --global url."https://$GITHUB_TOKEN:x-oauth-basic@github.com".insteadOf "https://github.com" || true
+  - run:
+      name: "Initialize Terraform"
+      command: |
+        terraform init -input=false -backend-config="region=us-west-2" -backend-config="bucket=lovepop-terraform" \
+        -backend-config="key=${AWS_ACCOUNT_ID}/remote_config/<<parameters.remote-config-key>>" -reconfigure -backend=true terraform/

@@ -1,0 +1,25 @@
+description: >
+  docker-push
+
+parameters:
+  image-repo:
+    description: "The repository in ECR to push images too."
+    type: string
+  image-tag:
+    description: "The tag we want to use to push our docker image -- GIT_SHA ENV variable is here as well as all of our circle variables"
+    type: string
+    default: "${CIRCLE_BRANCH}.${GIT_SHA}"
+steps:
+  - run:
+      name: "Login"
+      command: |
+        AWS_ECR_PWD=`aws ecr get-login-password --region us-west-2`
+        docker login --username AWS --password ${AWS_ECR_PWD} ${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com
+  - run:
+      name: "Set environment variables and push"
+      command: |
+        IMAGE_REPO="${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/<<parameters.image-repo>>"
+        GIT_SHA="$(git rev-parse --short HEAD)"
+        docker tag out ${IMAGE_REPO}:<<parameters.image-tag>>
+        docker push ${IMAGE_REPO}:<<parameters.image-tag>>
+

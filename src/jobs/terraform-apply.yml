@@ -1,0 +1,31 @@
+description: >
+  Sample description
+# What will this job do?
+
+executor: 
+  name: default
+  image: devops
+  tag: main.latest
+
+
+docker:
+  - image: hashicorp/terraform:<<parameters.terraform-version>>
+parameters:
+  remote-config-key:
+    description: "The key to use for the terraform remote config."
+    type: string
+  additional-terraform-arguments:
+    description: "String representation of additional arguments for terraform apply"
+    type: string
+    default: ""
+  terraform-version:
+    description: "Terraform version to use"
+    type: string
+    default: "0.11.14"
+steps:
+  - checkout
+  - terraform-initialize:
+      remote-config-key: <<parameters.remote-config-key>>
+  - terraform-apply:
+      additional-terraform-arguments: <<parameters.additional-terraform-arguments>>
+

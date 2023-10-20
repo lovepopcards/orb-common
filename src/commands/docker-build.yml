@@ -1,0 +1,15 @@
+description: >
+  Docker-buils
+
+
+parameters:
+  directory:
+    type: string
+    default: "."
+  dockerfile:
+    description: "Dockerfile to override defaults with"
+    type: string
+    default: "Dockerfile"
+steps:
+  - run: docker build --build-arg GITHUB_TOKEN -f <<parameters.dockerfile>> -t out <<parameters.directory>>
+
