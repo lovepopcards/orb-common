@@ -22,7 +22,7 @@ parameters:
     default: "0.11.14"
 steps:
   - checkout
-  - terraform-initialize:
+  - terraform_initialize:
       remote-config-key: <<parameters.remote-config-key>>
-  - terraform-apply:
+  - terraform_apply:
       additional-terraform-arguments: <<parameters.additional-terraform-arguments>>

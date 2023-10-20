@@ -14,5 +14,5 @@ steps:
   - checkout
   - docker_login
   - docker_build
-  - docker-push:
-      image_repo: <<parameters.image-repo>>
+  - docker_push:
+      image_repo: <<parameters.image_repo>>
