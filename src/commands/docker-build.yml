@@ -10,6 +10,6 @@ parameters:
     type: string
     default: "Dockerfile"
 steps:
-  - run: 
+  - run:
       name: "Docker Build"
       command: docker build --build-arg GITHUB_TOKEN -f <<parameters.dockerfile>> -t out <<parameters.directory>>
