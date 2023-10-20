@@ -1,12 +1,13 @@
 description: "Build and push the docker image"
+name: "main build"
 
-executor: 
+executor:
   name: default
   image: devops
   tag: main.latest
 
 parameters:
-  image-repo:
+  image_repo:
     description: "The repository in ECR to push images too."
     type: string
 steps:
@@ -15,5 +16,4 @@ steps:
   - docker-login
   - docker-build
   - docker-push:
-      image-repo: <<parameters.image-repo>>
-
+      image_repo: <<parameters.image-repo>>

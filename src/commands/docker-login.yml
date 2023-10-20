@@ -4,5 +4,5 @@ description: >
 steps:
   - run:
       name: "Log in to Github image repo"
-      command: |
-        echo $GITHUB_TOKEN | docker login https://docker.pkg.github.com -u lovepopcards --password-stdin
+      command: <<include(scripts/login-echo.sh)>>
+        

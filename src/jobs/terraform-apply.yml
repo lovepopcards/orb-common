@@ -1,12 +1,10 @@
 description: >
   Sample description
-# What will this job do?
 
-executor: 
+executor:
   name: default
   image: devops
   tag: main.latest
-
 
 docker:
   - image: hashicorp/terraform:<<parameters.terraform-version>>
@@ -28,4 +26,3 @@ steps:
       remote-config-key: <<parameters.remote-config-key>>
   - terraform-apply:
       additional-terraform-arguments: <<parameters.additional-terraform-arguments>>
-

@@ -1,0 +1,1 @@
+echo $GITHUB_TOKEN | docker login https://docker.pkg.github.com -u lovepopcards --password-stdin
