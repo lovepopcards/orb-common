@@ -9,9 +9,4 @@ parameters:
 steps:
   - run:
       name: "Terraform Apply"
-      command: |
-        GIT_SHA=$(git rev-parse --short HEAD)
-        terraform apply \
-        <<parameters.additional-terraform-arguments>> \
-        -var "container_version=${CIRCLE_BRANCH}.${GIT_SHA}" -var "vpc_id=${AWS_VPC_ID}" \
-        -var "env=${AWS_ENV}" -var "account=${AWS_ACCOUNT_ID}" -var "aws_region=us-west-2" -auto-approve terraform/
+      command: <<include(scripts/terraform_apply.sh)>>

@@ -12,7 +12,7 @@ parameters:
 steps:
   - setup_remote_docker
   - checkout
-  - docker-login
-  - docker-build
+  - docker_login
+  - docker_build
   - docker-push:
       image_repo: <<parameters.image-repo>>

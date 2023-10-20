@@ -12,4 +12,4 @@ parameters:
 steps:
   - run:
       name: "Docker Build"
-      command: docker build --build-arg GITHUB_TOKEN -f <<parameters.dockerfile>> -t out <<parameters.directory>>
+      command: <<include(scripts/docker_build.sh)>>

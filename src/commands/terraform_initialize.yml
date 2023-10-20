@@ -8,11 +8,7 @@ parameters:
 steps:
   - run:
       name: "Configure Git for Terraform"
-      command: |
-            git config --global --unset url.ssh://git@github.com.insteadof || true
-            git config --global url."https://$GITHUB_TOKEN:x-oauth-basic@github.com".insteadOf "https://github.com" || true
+      command: <<include(scripts/terraform_init_configure.sh)>>
   - run:
       name: "Initialize Terraform"
-      command: |
-        terraform init -input=false -backend-config="region=us-west-2" -backend-config="bucket=lovepop-terraform" \
-        -backend-config="key=${AWS_ACCOUNT_ID}/remote_config/<<parameters.remote-config-key>>" -reconfigure -backend=true terraform/
+      command: <<include(scripts/terraform_init_initialize.sh)>>
