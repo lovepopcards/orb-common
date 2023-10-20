@@ -9,14 +9,14 @@ executor:
 docker:
   - image: hashicorp/terraform:<<parameters.terraform-version>>
 parameters:
-  remote-config-key:
+  remote_config_key:
     description: "The key to use for the terraform remote config."
     type: string
-  additional-terraform-arguments:
+  additional_terraform_arguments:
     description: "String representation of additional arguments for terraform apply"
     type: string
     default: ""
-  terraform-version:
+  terraform_version:
     description: "Terraform version to use"
     type: string
     default: "0.11.14"
