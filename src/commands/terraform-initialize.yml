@@ -1,7 +1,6 @@
 description: >
   terraform Initialize
 
-
 parameters:
   remote-config-key:
     description: "The key to use for the terraform remote config."

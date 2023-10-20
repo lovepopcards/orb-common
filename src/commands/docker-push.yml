@@ -22,4 +22,3 @@ steps:
         GIT_SHA="$(git rev-parse --short HEAD)"
         docker tag out ${IMAGE_REPO}:<<parameters.image-tag>>
         docker push ${IMAGE_REPO}:<<parameters.image-tag>>
-
