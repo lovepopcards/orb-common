@@ -11,6 +11,9 @@ filters: &filters
 workflows:
   lint-pack:
     jobs:
+      - add_ssh_keys:
+          fingerprints:
+            - "b4:da:f7:0c:8e:b4:2a:1b:06:5c:96:ab:62:b4:a0:27"
       - orb-tools/lint:
           filters: *filters
       - orb-tools/pack:
@@ -26,3 +29,4 @@ workflows:
           orb_name: <orb-name>
           requires: [orb-tools/lint, orb-tools/pack, orb-tools/review, shellcheck/check]
           filters: *filters
+
