@@ -53,7 +53,7 @@ commands:
       image-tag:
         description: "The tag we want to use to push our docker image -- GIT_SHA ENV variable is here as well as all of our circle variables"
         type: string
-        default: "${replace(CIRCLE_BRANCH, '/', '-')}.${GIT_SHA}"
+        default: "$(echo $CIRCLE_BRANCH | tr '/' '-').$GIT_SHA"
     steps:
       - run:
           name: "Login"
