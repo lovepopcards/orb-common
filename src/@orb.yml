@@ -20,7 +20,7 @@ executors:
           description: "The image tag to use."
           type: string
       docker:
-        - image: docker.pkg.github.com/lovepopcards/base_images/<<parameters.image>>:<<parameters.tag>>
+        - image: ghcr.io/lovepopcards/base_images/<<parameters.image>>:<<parameters.tag>>
           auth:
             username: lovepopcards
             password: $GITHUB_TOKEN
@@ -31,7 +31,7 @@ commands:
       - run:
           name: "Log in to Github image repo"
           command: |
-            echo $GITHUB_TOKEN | docker login https://docker.pkg.github.com -u lovepopcards --password-stdin
+            echo $GITHUB_TOKEN | docker login https://ghcr.io -u lovepopcards --password-stdin
 
   docker-build:
     parameters:
