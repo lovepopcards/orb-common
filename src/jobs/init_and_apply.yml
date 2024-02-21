@@ -1,0 +1,67 @@
+description: Perform a terraform apply, preceeded by an optional init
+parameters:
+  terraform_version:
+    type: string
+    default: 0.12.3
+  working_directory:
+    description: where to execute terraform from
+    type: string
+    default: ~/project
+  auto_approve:
+    description: Whether to auto approve the apply
+    type: boolean
+    default: false
+  lock_timeout:
+    description: How long to wait for a lock to be acquired before erroring
+    type: string
+    default: 5m
+  plan_file:
+    description: File path of a plan file to be applied, relative to working_directory
+    type: string
+    default: terraform.plan
+  extra_args:
+    description: extra args to use when running terraform apply
+    type: string
+    default: ""
+  extra_args_init:
+    description: extra args to use when running terraform init
+    type: string
+    default: ""
+  attach_workspace:
+    description: Where to attach the workspace to. Empty string means no attachment will happen.
+    type: string
+    default: ~/project
+  init:
+    description: Wheter to perform a terraform init before the apply
+    type: boolean
+    default: false
+  module_ssh_sources:
+    description: A space separated string with the domains that terraform modules are fetched from using ssh (for example 'github.com bitbucket.com')
+    type: string
+    default: "github.com"
+  terraform_workspace:
+    description: Which terraform workspace to use, if any. The workspace will be created if it doesn't exist.
+    type: string
+    default: ""
+executor:
+  name: terraform
+  version: <<parameters.terraform_version>>
+working_directory: <<parameters.working_directory>>
+steps:
+  - when:
+      condition: <<parameters.attach_workspace>>
+      steps:
+        - attach_workspace:
+            at: <<parameters.attach_workspace>>
+  - when:
+      condition: <<parameters.init>>
+      steps:
+        - init:
+            module_ssh_sources: <<parameters.module_ssh_sources>>
+            extra_args: <<parameters.extra_args_init>>
+            terraform_workspace: <<parameters.terraform_workspace>>
+  - apply:
+      lock_timeout: <<parameters.lock_timeout>>
+      auto_approve: <<parameters.auto_approve>>
+      extra_args: <<parameters.extra_args>>
+      plan_file: <<parameters.plan_file>>

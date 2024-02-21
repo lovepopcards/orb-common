@@ -1,0 +1,16 @@
+parameters:
+  version:
+    type: string
+  username:
+    description: an optional environment variable name that holds the username to use to authenticate with the repository the image is on
+    type: env_var_name
+    default: DOCKER_HUB_USERNAME
+  password:
+    description: an optional environment variable name that holds the password to use to authenticate with the repository the image is on
+    type: env_var_name
+    default: DOCKER_HUB_PASSWORD
+docker:
+  - image: hashicorp/terraform:<<parameters.version>>
+    auth:
+      username: "$<<parameters.username>>"
+      password: "$<<parameters.password>>"

@@ -1,0 +1,38 @@
+description: Perform a terraform init
+parameters:
+  extra_args:
+    description: extra args to use when running terraform init
+    type: string
+    default: ""
+  attach_workspace:
+    description: A workspace to attach. Empty string means no attachment will happen.
+    type: string
+    default: ""
+  module_ssh_sources:
+    description: A space separated string with the domains that terraform modules are fetched from using ssh (for example 'github.com bitbucket.com')
+    type: string
+    default: ""
+  terraform_workspace:
+    description: Which terraform workspace to use, if any. The workspace will be created if it doesn't exist.
+    type: string
+    default: ""
+steps:
+  - when:
+      condition: <<parameters.module_ssh_sources>>
+      steps:
+        - run: mkdir -p ~/.ssh && ssh-keyscan -t rsa <<parameters.module_ssh_sources>> > ~/.ssh/known_hosts
+  - terraform:
+      attach_workspace: <<parameters.attach_workspace>>
+      command: init
+      args: <<parameters.extra_args>>
+  - when:
+      condition: <<parameters.terraform_workspace>>
+      steps:
+        - run: terraform workspace select <<parameters.terraform_workspace>> || terraform workspace new <<parameters.terraform_workspace>>
+  - when:
+      condition: <<parameters.attach_workspace>>
+      steps:
+        - persist_to_workspace:
+            root: .
+            paths:
+              - .terraform

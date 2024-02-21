@@ -1,0 +1,30 @@
+description: Perform a terraform plan
+parameters:
+  lock_timeout:
+    description: How long to wait for a lock to be acquired before erroring
+    type: string
+    default: 5m
+  plan_file:
+    description: File path of a plan file to be produced, relative to working_directory
+    type: string
+    default: terraform.plan
+  extra_args:
+    description: extra args to use when running terraform plan
+    type: string
+    default: ""
+  attach_workspace:
+    description: Where to attach the workspace to. Empty string means no attachment will happen.
+    type: string
+    default: ""
+steps:
+  - terraform:
+      attach_workspace: <<parameters.attach_workspace>>
+      command: plan
+      args: --lock-timeout=<<parameters.lock_timeout>> <<parameters.extra_args>> --out=<<parameters.plan_file>>
+  - when:
+      condition: <<parameters.attach_workspace>>
+      steps:
+        - persist_to_workspace:
+            root: .
+            paths:
+              - <<parameters.plan_file>>

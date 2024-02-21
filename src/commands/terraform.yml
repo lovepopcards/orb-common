@@ -1,0 +1,18 @@
+description: Run a terraform command
+parameters:
+  command:
+    type: string
+  args:
+    type: string
+    default: ""
+  attach_workspace:
+    description: Where to attach the workspace to. Empty string means no attachment will happen.
+    type: string
+    default: ""
+steps:
+  - when:
+      condition: <<parameters.attach_workspace>>
+      steps:
+        - attach_workspace:
+            at: <<parameters.attach_workspace>>
+  - run: terraform <<parameters.command>> <<parameters.args>>

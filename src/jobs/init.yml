@@ -1,0 +1,36 @@
+description: Perform a terraform init
+parameters:
+  terraform_version:
+    type: string
+    default: 0.12.3
+  working_directory:
+    description: where to execute terraform from
+    type: string
+    default: ~/project
+  extra_args:
+    description: extra args to use when running terraform init
+    type: string
+    default: ""
+  attach_workspace:
+    description: A workspace to attach. Empty string means no attachment will happen.
+    type: string
+    default: ~/project
+  module_ssh_sources:
+    description: A space separated string with the domains that terraform modules are fetched from using ssh (for example 'github.com bitbucket.com')
+    type: string
+    default: github.com
+  terraform_workspace:
+    description: Which terraform workspace to use, if any. The workspace will be created if it doesn't exist.
+    type: string
+    default: ""
+executor:
+  name: terraform
+  version: <<parameters.terraform_version>>
+working_directory: <<parameters.working_directory>>
+steps:
+  - init:
+      attach_workspace: <<parameters.attach_workspace>>
+      extra_args: <<parameters.extra_args>>
+      module_ssh_sources: <<parameters.module_ssh_sources>>
+      terraform_workspace: <<parameters.terraform_workspace>>
+      

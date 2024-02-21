@@ -1,0 +1,44 @@
+---
+version: 2.1
+
+executors:
+  cli:
+    docker:
+      - image: circleci/circleci-cli:latest
+        auth:
+          username: $DOCKER_HUB_USERNAME
+          password: $DOCKER_HUB_PASSWORD
+
+jobs:
+  validate:
+    executor: cli
+    steps:
+      - checkout
+      - run: circleci config pack src | circleci orb validate -
+  publish-dev:
+    executor: cli
+    steps:
+      - checkout
+      - run: circleci config pack src | circleci orb publish - lovepop/terraform@dev:$CIRCLE_SHA1 --token $CIRCLE_TOKEN
+  promote-prod:
+    executor: cli
+    steps:
+      - checkout
+      - run: circleci orb publish promote lovepop/terraform@dev:$CIRCLE_SHA1 patch --token $CIRCLE_TOKEN
+
+workflows:
+  all:
+    jobs:
+      - validate:
+          context: orb-publishing
+      - publish-dev:
+          context: orb-publishing
+          requires:
+            - validate
+      - promote-prod:
+          context: orb-publishing
+          requires:
+            - publish-dev
+          filters:
+            branches:
+              only: master

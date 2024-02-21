@@ -1,0 +1,27 @@
+description: Perform a terraform apply
+parameters:
+  auto_approve:
+    description: Whether to auto approve the apply
+    type: boolean
+    default: false
+  lock_timeout:
+    description: How long to wait for a lock to be acquired before erroring
+    type: string
+    default: 5m
+  plan_file:
+    description: File path of a plan file to be applied, relative to working_directory
+    type: string
+    default: terraform.plan
+  extra_args:
+    description: extra args to use when running terraform apply
+    type: string
+    default: ""
+  attach_workspace:
+    description: Where to attach the workspace to. Empty string means no attachment will happen.
+    type: string
+    default: ""
+steps:
+  - terraform:
+      attach_workspace: <<parameters.attach_workspace>>
+      command: apply
+      args: --lock-timeout=<<parameters.lock_timeout>> <<#parameters.auto_approve>>-auto-approve<</parameters.auto_approve>> <<parameters.extra_args>> <<parameters.plan_file>>
