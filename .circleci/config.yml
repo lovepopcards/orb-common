@@ -10,26 +10,38 @@ executors:
           password: $DOCKER_HUB_PASSWORD
 
 
-
 workflows:
   all:
     jobs:
-      validate:
+      - validate:
         executor: cli
         steps:
           - checkout
           - run: circleci config pack src | circleci orb validate -
-      created-orb:
+        filters:
+          branches:
+            only: orb_terraform
+      - created-orb:
         executor: cli
         steps:
           - checkout
           - run: circleci orb create lovepop/terraform --private --token $CIRCLE_TOKEN
-      publish-dev:
+        requires:
+            - validate
+        filters:
+          branches:
+            only: orb_terraform
+      - publish-dev:
         executor: cli
         steps:
           - checkout
           - run: circleci config pack src | circleci orb publish - lovepop/terraform@dev:$CIRCLE_SHA1 --token $CIRCLE_TOKEN
-      promote-prod:
+        requires:
+            - created-orb
+        filters:
+          branches:
+            only: orb_terraform
+      - promote-prod:
         executor: cli
         steps:
           - checkout
