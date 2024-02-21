@@ -9,45 +9,41 @@ executors:
           username: $DOCKER_HUB_USERNAME
           password: $DOCKER_HUB_PASSWORD
 
+jobs:
+  validate:
+    executor: cli
+    steps:
+      - checkout
+      - run: circleci config pack src | circleci orb validate -
+  create-orb:
+    executor: cli
+    steps:
+      - checkout
+      - run: circleci orb create lovepop/terraform --private --token $CIRCLE_TOKEN
+  publish-dev:
+    executor: cli
+    steps:
+      - checkout
+      - run: circleci config pack src | circleci orb publish - lovepop/terraform@dev:$CIRCLE_SHA1 --token $CIRCLE_TOKEN
+  promote-prod:
+    executor: cli
+    steps:
+      - checkout
+      - run: circleci orb publish promote lovepop/terraform@dev:$CIRCLE_SHA1 patch --token $CIRCLE_TOKEN
 
 workflows:
   all:
     jobs:
       - validate:
-        executor: cli
-        steps:
-          - checkout
-          - run: circleci config pack src | circleci orb validate -
-        filters:
-          branches:
-            only: orb_terraform
-      - created-orb:
-        executor: cli
-        steps:
-          - checkout
-          - run: circleci orb create lovepop/terraform --private --token $CIRCLE_TOKEN
-        requires:
+      - create-orb:
+          requires:
             - validate
-        filters:
-          branches:
-            only: orb_terraform
       - publish-dev:
-        executor: cli
-        steps:
-          - checkout
-          - run: circleci config pack src | circleci orb publish - lovepop/terraform@dev:$CIRCLE_SHA1 --token $CIRCLE_TOKEN
-        requires:
-            - created-orb
-        filters:
-          branches:
-            only: orb_terraform
+          requires:
+            - create-orb
       - promote-prod:
-        executor: cli
-        steps:
-          - checkout
-          - run: circleci orb publish promote lovepop/terraform@dev:$CIRCLE_SHA1 patch --token $CIRCLE_TOKEN
-        requires:
+          requires:
             - publish-dev
-        filters:
-          branches:
-            only: orb_terraform
+          filters:
+            branches:
+              only: orb_terraform
