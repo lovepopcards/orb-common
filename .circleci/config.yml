@@ -19,7 +19,7 @@ jobs:
     executor: cli
     steps:
       - checkout
-      - run: circleci orb create lovepop/terraform --private --token $CIRCLE_TOKEN
+      - run: circleci orb create lovepop/terraform --token $CIRCLE_TOKEN
   publish-dev:
     executor: cli
     steps:
