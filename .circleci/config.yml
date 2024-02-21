@@ -34,7 +34,7 @@ jobs:
 workflows:
   all:
     jobs:
-      - validate:
+      - validate
       - create-orb:
           requires:
             - validate
