@@ -85,6 +85,22 @@ commands:
             terraform init -input=false -backend-config="region=us-west-2" -backend-config="bucket=lovepop-terraform" \
             -backend-config="key=${AWS_ACCOUNT_ID}/remote_config/<<parameters.remote-config-key>>" -reconfigure -backend=true terraform/
 
+  terraform-plan:
+    parameters:
+      additional-terraform-arguments:
+        description: "String representation of additional arguments to pass to terraform apply"
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: "Terraform Plan"
+          command: |
+            GIT_SHA=$(git rev-parse --short HEAD)
+            terraform plan \
+            <<parameters.additional-terraform-arguments>> \
+            -var "container_version=${CIRCLE_BRANCH}.${GIT_SHA}" -var "vpc_id=${AWS_VPC_ID}" \
+            -var "env=${AWS_ENV}" -var "account=${AWS_ACCOUNT_ID}" -var "aws_region=us-west-2" terraform/
+
   terraform-apply:
     parameters:
       additional-terraform-arguments:
@@ -120,6 +136,29 @@ jobs:
         - docker-build
         - docker-push:
             image-repo: <<parameters.image-repo>>
+
+    terraform-plan:
+      description: "Plan terraform"
+      docker:
+        - image: hashicorp/terraform:<<parameters.terraform-version>>
+      parameters:
+        remote-config-key:
+          description: "The key to use for the terraform remote config."
+          type: string
+        additional-terraform-arguments:
+          description: "String representation of additional arguments for terraform apply"
+          type: string
+          default: ""
+        terraform-version:
+          description: "Terraform version to use"
+          type: string
+          default: "0.11.14"
+      steps:
+        - checkout
+        - terraform-initialize:
+            remote-config-key: <<parameters.remote-config-key>>
+        - terraform-apply:
+            additional-terraform-arguments: <<parameters.additional-terraform-arguments>>
 
     terraform-apply:
       description: "Apply terraform"
