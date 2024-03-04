@@ -130,7 +130,7 @@ jobs:
           type: string
       steps:
         - setup_remote_docker:
-            version: 20.10.23
+            version: docker23
         - checkout
         - docker-login
         - docker-build
